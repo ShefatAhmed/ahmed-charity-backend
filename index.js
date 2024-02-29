@@ -51,8 +51,15 @@ async function run() {
       // Hash the password
       const hashedPassword = await bcrypt.hash(password, 10);
 
+      const amount = 0;
+
       // Insert user into the database
-      await collection.insertOne({ name, email, password: hashedPassword });
+      await collection.insertOne({
+        name,
+        email,
+        amount,
+        password: hashedPassword,
+      });
 
       res.status(201).json({
         success: true,
@@ -77,15 +84,60 @@ async function run() {
       }
 
       // Generate JWT token
-      const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
-        expiresIn: process.env.EXPIRES_IN,
-      });
+      const token = jwt.sign(
+        { email: user.email, name: user.name, amount: user.amount },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: process.env.EXPIRES_IN,
+        }
+      );
 
       res.json({
         success: true,
         message: "Login successful",
         token,
       });
+    });
+
+    app.put("/api/auth/donors-user/:email", async (req, res) => {
+      const userEmail = req.params.email;
+      const { name, email, amount } = req.body;
+
+      try {
+        const existingUser = await collection.findOne({ email: userEmail });
+        if (!existingUser) {
+          return res.status(404).json({
+            success: false,
+            message: "User not found",
+          });
+        }
+        const filter = { email: userEmail };
+        const updateData = {
+          $set: {
+            name: name || existingUser.name,
+            email: email || existingUser.email,
+            amount: amount || existingUser.amount,
+          },
+        };
+
+        const result = await collection.updateOne(filter, updateData);
+
+        res.json({
+          success: true,
+          message: "User information updated successfully",
+          updatedUser: {
+            name: name || existingUser.name,
+            email: email || existingUser.email,
+            amount: amount || existingUser.amount,
+          },
+        });
+      } catch (error) {
+        console.error("Error updating user information:", error);
+        res.status(500).json({
+          success: false,
+          message: "Internal server error",
+        });
+      }
     });
 
     //create a donation
