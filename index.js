@@ -34,6 +34,7 @@ async function run() {
     const collection = db.collection("users");
     const donationCollection = db.collection("donation");
     const donatedCollection = db.collection("donated");
+    const coummunityCollection = db.collection("coummunity");
 
     // User Registration
     app.post("/api/auth/register", async (req, res) => {
@@ -123,13 +124,9 @@ async function run() {
         const result = await collection.updateOne(filter, updateData);
 
         res.json({
-          success: true,
-          message: "User information updated successfully",
-          updatedUser: {
-            name: name || existingUser.name,
-            email: email || existingUser.email,
-            amount: amount || existingUser.amount,
-          },
+          name: name || existingUser.name,
+          email: email || existingUser.email,
+          amount: amount || existingUser.amount,
         });
       } catch (error) {
         console.error("Error updating user information:", error);
@@ -137,6 +134,19 @@ async function run() {
           success: false,
           message: "Internal server error",
         });
+      }
+    });
+
+    //get all users
+
+    app.get("/api/v1/users", async (req, res) => {
+      try {
+        // Fetch data from the collection and sort it by the "amount" field in descending order
+        const result = await collection.find().sort({ amount: -1 }).toArray();
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching and sorting data:", error);
+        res.status(500).send("Internal Server Error");
       }
     });
 
@@ -187,6 +197,23 @@ async function run() {
     //donated post
     app.get("/api/v1/donated", async (req, res) => {
       const result = await donatedCollection.find().toArray();
+      res.send(result);
+    });
+
+    //coummunity post
+    app.post("/api/v1/comment", async (req, res) => {
+      const { name, heading, comment, date } = req.body;
+      const data = await coummunityCollection.insertOne({
+        name,
+        heading,
+        comment,
+        date,
+      });
+      res.send(data);
+    });
+
+    app.get("/api/v1/comments", async (req, res) => {
+      const result = await coummunityCollection.find().sort({_id: -1}).toArray();
       res.send(result);
     });
 
