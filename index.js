@@ -101,7 +101,6 @@ async function run() {
         token,
       });
     });
-
     app.put("/api/auth/donors-user/:email", async (req, res) => {
       const userEmail = req.params.email;
       const { name, email, amount } = req.body;
@@ -140,7 +139,6 @@ async function run() {
     });
 
     //get all users
-
     app.get("/api/v1/users", async (req, res) => {
       try {
         // Fetch data from the collection and sort it by the "amount" field in descending order
@@ -178,7 +176,6 @@ async function run() {
       const result = await donationCollection.deleteOne(query);
       res.send(result);
     });
-
     app.put("/api/v1/donation/:id", async (req, res) => {
       const id = req.params.id;
       const donation = req.body;
@@ -213,7 +210,6 @@ async function run() {
       });
       res.send(data);
     });
-
     app.get("/api/v1/comments", async (req, res) => {
       const result = await coummunityCollection
         .find()
@@ -223,7 +219,6 @@ async function run() {
     });
 
     //testimonial
-
     app.post("/api/v1/testimonial", async (req, res) => {
       const { name, image, amount, description } = req.body;
       const data = await testimonialCollection.insertOne({
@@ -234,7 +229,6 @@ async function run() {
       });
       res.send(data);
     });
-
     app.get("/api/v1/testimonials", async (req, res) => {
       const result = await testimonialCollection.find().toArray();
       res.send(result);
@@ -251,7 +245,6 @@ async function run() {
       });
       res.send(data);
     });
-
     app.get("/api/v1/volunteers", async (req, res) => {
       const result = await volunteerCollection.find().toArray();
       res.send(result);
