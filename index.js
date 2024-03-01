@@ -35,6 +35,8 @@ async function run() {
     const donationCollection = db.collection("donation");
     const donatedCollection = db.collection("donated");
     const coummunityCollection = db.collection("coummunity");
+    const testimonialCollection = db.collection("testimonial");
+    const volunteerCollection = db.collection("volunteer");
 
     // User Registration
     app.post("/api/auth/register", async (req, res) => {
@@ -213,7 +215,45 @@ async function run() {
     });
 
     app.get("/api/v1/comments", async (req, res) => {
-      const result = await coummunityCollection.find().sort({_id: -1}).toArray();
+      const result = await coummunityCollection
+        .find()
+        .sort({ _id: -1 })
+        .toArray();
+      res.send(result);
+    });
+
+    //testimonial
+
+    app.post("/api/v1/testimonial", async (req, res) => {
+      const { name, image, amount, description } = req.body;
+      const data = await testimonialCollection.insertOne({
+        name,
+        image,
+        amount,
+        description,
+      });
+      res.send(data);
+    });
+
+    app.get("/api/v1/testimonials", async (req, res) => {
+      const result = await testimonialCollection.find().toArray();
+      res.send(result);
+    });
+
+    // volunteer
+    app.post("/api/v1/volunteer", async (req, res) => {
+      const { name, email, phoneNumber, location } = req.body;
+      const data = await volunteerCollection.insertOne({
+        name,
+        email,
+        phoneNumber,
+        location,
+      });
+      res.send(data);
+    });
+
+    app.get("/api/v1/volunteers", async (req, res) => {
+      const result = await volunteerCollection.find().toArray();
       res.send(result);
     });
 
