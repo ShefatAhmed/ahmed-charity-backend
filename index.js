@@ -193,6 +193,48 @@ async function run() {
       res.send(result);
     });
 
+    app.post("/api/v1/donation/:id/review", async (req, res) => {
+      const donationId = req.params.id;
+      const { reviewText, reviewerName } = req.body;
+
+      const review = {
+        text: reviewText,
+        name: reviewerName,
+        date: new Date(),
+      };
+
+      try {
+        const result = await donationCollection.updateOne(
+          { _id: new ObjectId(donationId) },
+          { $push: { reviews: review } }
+        );
+        res.json({ success: true, result });
+      } catch (error) {
+        console.error("Error adding review:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    });
+
+    app.get("/api/v1/donation/:id/reviews", async (req, res) => {
+      const donationId = req.params.id;
+
+      try {
+        const donation = await donationCollection.findOne(
+          { _id: new ObjectId(donationId) },
+          { projection: { reviews: 1 } }
+        );
+
+        if (!donation) {
+          return res.status(404).json({ message: "Donation not found" });
+        }
+
+        res.json(donation.reviews || []);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    });
+
     //donated post
     app.get("/api/v1/donated", async (req, res) => {
       const result = await donatedCollection.find().toArray();
